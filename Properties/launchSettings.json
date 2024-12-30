@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "WinUI3_Direct2D_Print (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "WinUI3_Direct2D_Print (Unpackaged)": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

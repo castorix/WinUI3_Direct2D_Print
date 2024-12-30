@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="WinUI3_Direct2D_Print.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WinUI3_Direct2D_Print"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
+    </StackPanel>-->   
+    <Grid x:Name="mainGrid">
+        <Grid.Resources>
+            <DataTemplate x:Key="LinedFlowLayoutItemTemplate" x:DataType="local:CustomDataObject">
+                <ItemContainer AutomationProperties.Name="{x:Bind Title}">
+                    <Grid>
+                        <Image Source="{x:Bind ImageLocation}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="70"/>
+                        <StackPanel Orientation="Vertical" Height="40" VerticalAlignment="Bottom" Padding="5,1,5,1" Background="{ThemeResource SystemControlBackgroundBaseMediumBrush}" Opacity=".75">
+                            <TextBlock Text="{x:Bind Title}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                </ItemContainer>
+            </DataTemplate>
+            <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <DataTemplate x:Key="ListViewItemTemplate" x:DataType="local:CustomDataObject">
+                <Grid Margin="0,12,0,12" AutomationProperties.Name="{x:Bind Title}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="200"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Image Source="{x:Bind ImageLocation}" MaxHeight="160" Stretch="Uniform"/>
+                    <StackPanel Margin="12,0,0,0" Grid.Column="1" >
+                        <TextBlock Text="{x:Bind Title}" FontSize="14" FontWeight="SemiBold" Style="{ThemeResource BaseTextBlockStyle}"
+                        HorizontalAlignment="Left" Margin="0,0,0,6" LineHeight="20"/>
+                        <!--<TextBlock Text="{x:Bind Description}" FontFamily="Segoe UI" FontWeight="Normal" Style="{ThemeResource BodyTextBlockStyle}"
+                        TextTrimming="CharacterEllipsis" Width="300" MaxLines="1"/>-->
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <!--<RowDefinition Height="*"></RowDefinition>-->
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin ="0, 5, 0, 0">
+            <Button x:Name="btnPrint" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5, 10, 0, 0" Width="36" Height="34"
+                    Click="btnPrint_Click"  HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                    FontFamily="Segoe UI Emoji" FontSize="26" Content="&#x1F5A8;" Padding="-1, -5, 0, 0" >
+                <ToolTipService.ToolTip>
+                    <ToolTip Content="Print selected control" Placement="Bottom" Background="LightYellow" Foreground="Black"/>
+                </ToolTipService.ToolTip>              
+            </Button>
+            <StackPanel x:Name="sp0"></StackPanel>
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 5, 0, 0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 5, 0, 0">
+                    <ToggleSwitch x:Name="tsSilent" Header="Silent printing" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10, 0, 0, 0"
+                                      OffContent="No" OnContent="Yes" Toggled="tsSilent_Toggled"  IsOn="False">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="If Yes, print on the selected printer" Placement="Bottom" Background="LightYellow" Foreground="Black"/>
+                    </ToolTipService.ToolTip>
+                    </ToggleSwitch>
+                    <ToggleSwitch x:Name="tsOrientation" Header="Orientation" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10, 0, 0, 0"
+                                  OffContent="Landscape" OnContent="Portrait" Toggled="tsOrientation_Toggled"  IsOn="True"
+                                  Visibility="{Binding IsOn, ElementName=tsSilent}">                       
+                    </ToggleSwitch>
+                </StackPanel>
+                <ComboBox x:Name="cbPrinters" Width="300" Margin="10, 10, 0, 0" VerticalAlignment="Center"
+                      SelectionChanged="cbPrinters_SelectionChanged"
+                      ItemsSource="{x:Bind Printers}"
+                      Visibility="{Binding IsOn, ElementName=tsSilent}">
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 5, 0, 0">
+                <ComboBox x:Name="cmbControls" Width="230" Margin ="10, 0, 0, 0" Height="40" MaxDropDownHeight="600"
+                               SelectedIndex="0" SelectionChanged="cmbControls_SelectionChanged">
+                    <ComboBoxItem Content="RichEditBox"/>
+                    <ComboBoxItem Content="Image"/>
+                    <ComboBoxItem Content="ListView"/>
+                    <ComboBoxItem Content="Window"/>
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Choose control to print" Placement="Bottom" Background="LightYellow" Foreground="Black"/>
+                    </ToolTipService.ToolTip>
+                </ComboBox>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" >
+                    <TextBlock Margin="10, 5, 0, 0">Output file : </TextBlock>
+                    <TextBox x:Name="tbOutputFile" Width="600" Height="34" Margin="5, 0, 0, 0" IsReadOnly="True"></TextBox>
+                </StackPanel>              
+            </StackPanel>
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin ="0, 5, 0, 0">
+                <ToggleSwitch x:Name="tsScale" Header="Fit to page" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10, 5, 0, 0"
+                  OffContent="No" OnContent="Yes" Toggled="tsScale_Toggled" IsOn="True">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Fit to page width" Placement="Bottom" Background="LightYellow" Foreground="Black"/>
+                    </ToolTipService.ToolTip>
+                </ToggleSwitch>
+                <NumberBox x:Name="nbScale" Header="Scale (0-1) :" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 0, 0, 0"
+                           Width="200" Minimum="0" Maximum="1" SmallChange="0.01" LargeChange="0.1" Value="0.5"
+                           SpinButtonPlacementMode="Hidden" ValueChanged="nbScale_ValueChanged" 
+                           Visibility="{Binding IsOn, ElementName=tsScale, Converter={StaticResource BooleanToVisibilityConverter}}" >
+                </NumberBox>
+            </StackPanel>
+            <!--<StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin ="0, 5, 0, 0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" >
+                    <Button x:Name="btnPDFFile"
+                      FontFamily="Segoe UI Emoji" FontSize="26" Content="&#x1F4C1;" Padding="0, -5, 0, 0" >
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="Choose file for PDF printer" Placement="Bottom" Background="LightYellow" Foreground="Black"/>
+                        </ToolTipService.ToolTip>
+                    </Button>
+                    <TextBox x:Name="tbPDFFile" Width="400" Height="34" Margin="0, 8, 0, 0"></TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" >
+                    <Button x:Name="btnXPSFile"
+                            FontFamily="Segoe UI Emoji" FontSize="26" Content="&#x1F4C1;" Padding="0, -5, 0, 0" >
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="Choose file for XPS printer" Placement="Bottom" Background="LightYellow" Foreground="Black"/>
+                        </ToolTipService.ToolTip>
+                    </Button>
+                    <TextBox x:Name="tbXPSFile" Width="400" Height="34" Margin="0, 8, 0, 0"></TextBox>
+                </StackPanel>
+            </StackPanel>-->
+
+        </StackPanel>
+        <Border x:Name="borderRE1" Grid.Row="1" Grid.Column="0" Background="Transparent" BorderThickness="2" BorderBrush="Gray" Margin="10, 10, 5, 10">
+            <RichEditBox x:Name="reb1" MinWidth="550" Margin="0, 0, 0, 0" Background="White" Foreground="Black"
+                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            </RichEditBox>
+        </Border>
+
+        <Border x:Name="borderIMG1" Grid.Row="1" Grid.Column="1" Background="Transparent" BorderThickness="2" BorderBrush="Gray" Margin="5, 10, 5, 10">
+            <!--<ItemsView x:Name="iv1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemTemplate="{StaticResource LinedFlowLayoutItemTemplate}">
+                <ItemsView.Layout>
+                    <LinedFlowLayout ItemsStretch="Fill" LineHeight="220" LineSpacing="5" MinItemSpacing="5"/>
+                </ItemsView.Layout>
+            </ItemsView>-->
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer.Resources>
+                    <Style TargetType="ScrollBar">
+                        <Setter Property="Background" Value="White"/>
+                    </Style>
+                </ScrollViewer.Resources>
+                <Image x:Name="img1" Margin="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                       Source="Assets/Angelina-Jolie1920x3000.jpg">
+                </Image>
+            </ScrollViewer>
+        </Border>
+
+        <Border x:Name="borderLV1" Grid.Row="1" Grid.Column="2" Background="Transparent" BorderThickness="2" BorderBrush="Gray" Margin="5, 10, 10, 10">
+            <ListView x:Name="lv1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="300" BorderThickness="1"
+                      BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
+                      ItemTemplate="{StaticResource ListViewItemTemplate}">
+            </ListView>
+        </Border>
+    </Grid>
+</Window>
