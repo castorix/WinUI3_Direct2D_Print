@@ -1,7 +1,7 @@
 # WinUI3_Direct2D_Print
 
 Test [ID2D1PrintControl](https://learn.microsoft.com/en-us/windows/win32/api/d2d1_1/nn-d2d1_1-id2d1printcontrol) in WinUI 3
- (tested on Windows 10 22H2, Windows App SDK 1.6.241114003)
+ (tested on Windows 10 22H2, Windows App SDK 1.6.241114003, 1.7.250401001)
  
  Can be used for silent printing.
  
