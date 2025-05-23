@@ -1267,8 +1267,11 @@ namespace WinUI3_Direct2D_Print
                 hPrinterDC = GetPrinterDC(bDialog, ref pDevNames, ref pDevMode);
             else
             {
-                sPrinterName = cbPrinters.SelectedItem.ToString();
-                hPrinterDC = GetPrinterDCFromPrinter(sPrinterName, out pDevMode);
+                if (cbPrinters.SelectedItem != null)
+                {
+                    sPrinterName = cbPrinters.SelectedItem.ToString();
+                    hPrinterDC = GetPrinterDCFromPrinter(sPrinterName, out pDevMode);
+                }
             }
 
             if (hPrinterDC != IntPtr.Zero)
@@ -1528,7 +1531,7 @@ namespace WinUI3_Direct2D_Print
                                                 //m_pD2DDeviceContext.Clear(new ColorF(ColorF.Enum.Blue, 1.0f));
                                                 m_pD2DDeviceContext.Clear(m_BackColor);                                                
 
-                                                D2D1_SIZE_F sizeBmp = pD2DBitmap.GetSize();
+                                                 pD2DBitmap.GetSize(out D2D1_SIZE_F sizeBmp);
                                                 //D2D1_RECT_F sourceRect = new D2D1_RECT_F(0.0f, 0.0f, sizeBmp.width, sizeBmp.height);                                                    
                                                 nSourceHeight = sizeBmp.height / nPages;
                                                 D2D1_RECT_F sourceRect = new D2D1_RECT_F(nSourceX, nSourceY, nSourceX + sizeBmp.width, nSourceY + nSourceHeight);
@@ -1744,6 +1747,8 @@ namespace WinUI3_Direct2D_Print
             }
             else
             {
+                if (sPrinterName == null)
+                    sPrinterName = "<no selected printer>";
                 Windows.UI.Popups.MessageDialog md = new Windows.UI.Popups.MessageDialog("Could not get printer DC for printer : " + sPrinterName, "Error");
                 WinRT.Interop.InitializeWithWindow.Initialize(md, hWndMain);
                 _ = await md.ShowAsync();
